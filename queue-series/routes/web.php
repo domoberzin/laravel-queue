@@ -1,6 +1,8 @@
 <?php
 
+use App\Jobs\ReconcileAccount;
 use Illuminate\Support\Facades\Route;
+use App\Models\User;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,9 +16,10 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    dispatch(function() {
-        logger('Hello from the queue!');
-    })->delay(now()->addMinutes(1));
+    $users = User::factory()->count(3)->create();
+    $user = User::all()->first();
+    ReconcileAccount::dispatch($user)->onQueue('high');
+//    dispatch(new ReconcileAccount($user));
 
     return 'Finished';
 });
