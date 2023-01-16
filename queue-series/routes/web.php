@@ -16,10 +16,20 @@ use App\Models\User;
 */
 
 Route::get('/', function () {
-    $users = User::factory()->count(3)->create();
-    $user = User::all()->first();
-    ReconcileAccount::dispatch($user)->onQueue('high');
-//    dispatch(new ReconcileAccount($user));
-
-    return 'Finished';
+    $pipeline = app('Illuminate\Pipeline\Pipeline');
+    $pipeline->send('Hello')
+        ->through([
+            // "Middleware" closures, modify input and pass to next
+            function ($passable, $next) {
+                return $next($passable . ' World');
+            },
+            function ($passable, $next) {
+                return $next($passable . '!');
+            },
+            ReconcileAccount::class
+        ])
+        ->then(function ($passable) {
+            dump($passable);
+        });
+    return 'Done';
 });
