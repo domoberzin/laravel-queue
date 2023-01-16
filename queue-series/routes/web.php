@@ -1,6 +1,9 @@
 <?php
 
 use App\Jobs\ReconcileAccount;
+use Illuminate\Bus\Dispatcher;
+use Illuminate\Routing\Pipeline;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Route;
 use App\Models\User;
 
@@ -16,20 +19,18 @@ use App\Models\User;
 */
 
 Route::get('/', function () {
-    $pipeline = app('Illuminate\Pipeline\Pipeline');
-    $pipeline->send('Hello')
-        ->through([
-            // "Middleware" closures, modify input and pass to next
-            function ($passable, $next) {
-                return $next($passable . ' World');
-            },
-            function ($passable, $next) {
-                return $next($passable . '!');
-            },
-            ReconcileAccount::class
-        ])
-        ->then(function ($passable) {
-            dump($passable);
-        });
+    $user = User::first();
+
+    $job = new ReconcileAccount($user);
+
+    Bus::dispatch($job);
+//    resolve(Dispatcher::class)->dispatch($job);
+
+//    $pipeline = new Pipeline(app());
+//
+//    $pipeline->send($job)->through([])->then(function () use ($job) {
+//        $job->handle();
+//    });
+
     return 'Done';
 });
