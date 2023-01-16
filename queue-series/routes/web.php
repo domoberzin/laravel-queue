@@ -21,9 +21,13 @@ use App\Models\User;
 Route::get('/', function () {
     $user = User::first();
 
-    $job = new ReconcileAccount($user);
 
-    Bus::dispatch($job);
+    ReconcileAccount::dispatch($user);
+//    $job = new ReconcileAccount($user);
+
+
+//    Bus::dispatch($job);
+
 //    resolve(Dispatcher::class)->dispatch($job);
 
 //    $pipeline = new Pipeline(app());
